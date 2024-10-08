@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import os
 import time
 
@@ -23,37 +25,49 @@ def validate_ec2_instance(instance_id):
     try:
         # Open AWS login page
         driver.get('https://aws.amazon.com/')
-        time.sleep(2)
-
-        # Click on Sign In to the Console
-        sign_in = driver.find_element(By.LINK_TEXT, 'Sign In to the Console')
+        
+        # Wait for the Sign In link to be present and click it
+        sign_in = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Sign In to the Console'))
+        )
         sign_in.click()
-        time.sleep(3)
 
-        # Enter AWS access key
-        access_key_input = driver.find_element(By.NAME, 'username')
+        # Wait for username input field to be present
+        access_key_input = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, 'username'))
+        )
         access_key_input.send_keys(os.environ['AWS_ACCESS_KEY_ID'])
 
         # Click Next
         driver.find_element(By.ID, 'signin_submit').click()
-        time.sleep(3)
 
-        # Enter AWS secret key
-        secret_key_input = driver.find_element(By.NAME, 'password')
+        # Wait for the password input field to be present
+        secret_key_input = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, 'password'))
+        )
         secret_key_input.send_keys(os.environ['AWS_SECRET_ACCESS_KEY'])
 
         # Click Sign In
         driver.find_element(By.ID, 'signin_submit').click()
-        time.sleep(5)
+
+        # Wait for the EC2 dashboard to load
+        WebDriverWait(driver, 10).until(
+            EC.url_contains('ec2/home')
+        )
 
         # Navigate to the EC2 Dashboard
         driver.get('https://console.aws.amazon.com/ec2/v2/home')
-        time.sleep(5)
 
-        # Search for the instance by ID
-        search_box = driver.find_element(By.XPATH, '//*[@id="search-ec2"]')
+        # Wait for the search box to be present and search for the instance
+        search_box = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*[@id="search-ec2"]'))
+        )
         search_box.send_keys(instance_id + Keys.RETURN)
-        time.sleep(5)
+
+        # Wait for the instance details to load
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, f"//td[contains(text(), '{instance_id}')]"))
+        )
 
         # Check instance status
         try:
@@ -81,6 +95,7 @@ def validate_ec2_instance(instance_id):
 # Call the validation function
 if __name__ == "__main__":
     validate_ec2_instance(instance_id)
+
 
 
 
