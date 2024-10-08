@@ -2,22 +2,19 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import os
 import boto3
 
 # Function to validate EC2 instance
 def validate_ec2_instance(instance_id):
     ec2 = boto3.client('ec2')
     response = ec2.describe_instances(InstanceIds=[instance_id])
+    instance_state = response['Reservations'][0]['Instances'][0]['State']['Name']
     
-    # Retrieve the instance state and launch time
-    instance = response['Reservations'][0]['Instances'][0]
-    instance_state = instance['State']['Name']
-    launch_time = instance['LaunchTime']
-
-    print(f"Instance {instance_id} state: {instance_state}. Launched at: {launch_time}.")
-
     if instance_state == 'running':
-        print(f"Instance {instance_id} is running.")
+        print(f"Instance {instance_id} is running")
 
         # Set up Selenium to connect to the container
         selenium_url = "http://localhost:4444/wd/hub"  # Connect to the Selenium server running in the service
@@ -33,9 +30,17 @@ def validate_ec2_instance(instance_id):
             # Replace with the actual EC2 instance public DNS/IP
             driver.get("http://3.80.247.247")  # Modify with actual EC2 URL
 
-            # Perform validation (e.g., checking a page element)
-            element = driver.find_element(By.ID, "expected-element-id")  # Adjust as needed
-            print("Element found, instance validation successful!")
+            # Check if the expected text is present on the page
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.TAG_NAME, "h1"))  # Assuming "h1" tag or check for the welcome text
+            )
+            page_source = driver.page_source
+            
+            # Validate the presence of the nginx welcome message
+            if "Welcome to nginx!" in page_source:
+                print("Nginx welcome message found, instance validation successful!")
+            else:
+                print("Nginx welcome message not found, instance validation failed.")
         except Exception as e:
             print(f"Error during instance validation: {e}")
             return False
@@ -44,7 +49,7 @@ def validate_ec2_instance(instance_id):
 
         return True
     else:
-        print(f"Instance {instance_id} is not running. Current state: {instance_state}.")
+        print(f"Instance {instance_id} is not running. Current state: {instance_state}")
         return False
 
 
