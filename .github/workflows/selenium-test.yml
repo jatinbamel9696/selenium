@@ -32,6 +32,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt  # Ensure selenium gets installed
 
-    - name: Run Selenium script
+    # - name: Run Selenium script
+    #   run: |
+    #     python selenium_script.py  
+
+    - name: Run EC2 validation script
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: "us-east-1"  # Replace with your AWS region
       run: |
-        python selenium_script.py  
+        python instance_test.py
