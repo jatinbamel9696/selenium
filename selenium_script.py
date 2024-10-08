@@ -1,5 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 import os
 import boto3
 
@@ -14,7 +16,12 @@ def validate_ec2_instance(instance_id):
 
         # Set up Selenium to connect to the container
         selenium_url = "http://localhost:4444/wd/hub"
-        chrome_options = webdriver.ChromeOptions()
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Run headless
+        chrome_options.add_argument("--no-sandbox")  # Bypass OS security model
+        chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
+
+        # Connect to the Selenium server
         driver = webdriver.Remote(command_executor=selenium_url, options=chrome_options)
 
         try:
