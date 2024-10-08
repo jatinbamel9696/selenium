@@ -26,7 +26,7 @@ def validate_ec2_instance(instance_id):
 
         try:
             # Replace with the actual EC2 instance public DNS/IP
-            driver.get("http://i-037b62ef3a84bff22")  # Modify with actual EC2 URL
+            driver.get("http://3.80.247.247")  # Modify with actual EC2 URL
 
             # Perform validation (e.g., checking a page element)
             element = driver.find_element(By.ID, "expected-element-id")  # Adjust as needed
