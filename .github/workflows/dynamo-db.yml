@@ -28,7 +28,7 @@ jobs:
         AWS_DEFAULT_REGION: "us-east-1"
       run: |
         REQUEST_ID=${{ github.event.id }}
-        python dynamo-db.py
+        python dynamodb_db.py $REQUEST_ID
     
     - name: Copy files to S3
       run: |
