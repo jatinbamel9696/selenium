@@ -1,0 +1,37 @@
+name: DynamoDB
+
+on:
+  workflow_dispatch:  # This allows manual or API-triggered runs
+
+jobs:
+  selenium-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Insert Request ID into DynamoDB
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: "us-east-1"
+      run: |
+        REQUEST_ID=${{ github.event.id }}
+        python dynamo-db.py
+    
+    - name: Copy files to S3
+      run: |
+        BUCKET_NAME="test-j3"
+        FILES_TO_COPY="./"  # Adjust the path as needed
+        aws s3 cp $FILES_TO_COPY s3://$BUCKET_NAME/Git/ --recursive
