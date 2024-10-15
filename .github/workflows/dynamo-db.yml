@@ -27,11 +27,17 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: "us-east-1"
       run: |
-        REQUEST_ID=3
+        
+        GITHUB_EVENT_ID=${{ github.event.id }}  # Get the GitHub Event ID
+        echo "Inserting GitHub Event ID: $GITHUB_EVENT_ID into DynamoDB"  
         python dynamo-db.py $REQUEST_ID
-    
+        
     - name: Copy files to S3
       run: |
         BUCKET_NAME="test-j3"
         FILES_TO_COPY="./"  # Adjust the path as needed
         aws s3 cp $FILES_TO_COPY s3://$BUCKET_NAME/Git/ --recursive
+      env:
+       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Use GitHub Secrets for AWS credentials
+       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+       AWS_DEFAULT_REGION: us-east-1
