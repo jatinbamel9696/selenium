@@ -27,7 +27,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: "us-east-1"
       run: |
-        REQUEST_ID=${{ github.event.id }}
+        REQUEST_ID=3
         python dynamo-db.py $REQUEST_ID
     
     - name: Copy files to S3
