@@ -28,9 +28,9 @@ jobs:
         AWS_DEFAULT_REGION: "us-east-1"
       run: |
         
-        GITHUB_EVENT_ID=${{ github.event.id }}  # Get the GitHub Event ID
-        echo "Inserting GitHub Event ID: $GITHUB_EVENT_ID into DynamoDB"  
-        python dynamo-db.py $REQUEST_ID
+        GITHUB_EVENT_ID=${{ github.run_id }}  # Get the GitHub Event ID
+        echo "Inserting GitHub Event ID: $GITHUB_EVENT_ID into DB"  
+        python dynamo-db.py $GITHUB_EVENT_ID
         
     - name: Copy files to S3
       run: |
